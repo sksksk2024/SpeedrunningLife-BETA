@@ -8,13 +8,18 @@ local PlayerDataService = require(ServerScriptService.Services.PlayerDataService
 local StateService = require(ServerScriptService.Services.StateService)
 local SoundUtil = require(RS.Modules.SoundUtil)
 
-local Remotes = RS.Remotes
+-- Remotes
 local FightEndWin = Remotes:WaitForChild("FightEndWin")
 local StartFight = Remotes:WaitForChild("StartFight")
 local FightEndDefeat = Remotes:WaitForChild("FightEndDefeat")
 local UpdateBullyHealth = Remotes:WaitForChild("UpdateBullyHealth")
 local UpdatePlayerHealth = Remotes:WaitForChild("UpdatePlayerHealth")
 local PlayerAttack = Remotes:WaitForChild("PlayerAttack")
+
+-- VFX Remotes
+local TriggerPunchPlayerVFX = Remotes:WaitForChild("TriggerPunchPlayerVFX")
+local TriggerPunchBullyVFX = Remotes:WaitForChild("TriggerPunchBullyVFX")
+local TriggerKickPlayerVFX = Remotes:WaitForChild("TriggerKickPlayerVFX")
 
 local BullyService = {}
 local animationCache = {} -- [animationId] = Animation instance
@@ -234,14 +239,16 @@ function BullyService:PlayerAttack(player)
 	local random = math.random(1, 2)
 	if random == 1 then
 		playAnimation(player.Character, Constants.Animations.Player.Punch, 1)
-		
 		-- Play player's punch sound
 		SoundUtil.playSound(punchPlayerSound, hrp)
+		-- Trigger punch VFX on player
+		TriggerPunchPlayerVFX:FireClient(player)
 	else
 		playAnimation(player.Character, Constants.Animations.Player.Kick, 1)
-		
 		-- Play player's kick sound
 		SoundUtil.playSound(kickPlayerSound, hrp)
+		-- Trigger kick VFX on player
+		TriggerKickPlayerVFX:FireClient(player)
 	end
 
 	-- Play bully's hurt animation
@@ -285,6 +292,9 @@ function BullyService:BullyAttackLoop(player)
 
 		-- Play bully's punch sound
 		SoundUtil.playSound(punchBullySound, hrp)
+		
+		-- Trigger punch VFX on bully
+		TriggerPunchBullyVFX:FireClient(player, fight.bully)
 
 		-- Calculate damage
 		local bullyDamage = Constants.BullyDamage["Level" .. fight.bullyLevel]

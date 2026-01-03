@@ -22,6 +22,9 @@ local SoundUtil = require(RS.Modules.SoundUtil)
 -- Sound
 local reviveSound = Constants.Sounds.reviveSound
 
+local Remotes = RS.Remotes
+local TriggerReviveVFX = Remotes:WaitForChild("TriggerReviveVFX")
+
 -- Initialize services
 TrashCollectionService:Init()
 WorldService:Init()
@@ -49,6 +52,8 @@ Players.PlayerAdded:Connect(function(player)
 		
 		-- Play Revive sound
 		SoundUtil.playSound(reviveSound, hrp)
+		TriggerReviveVFX:FireClient(player)
+		
 
 		-- Play intro cutscene on first join
 		--CutsceneService:PlayIntroCutscene(player)

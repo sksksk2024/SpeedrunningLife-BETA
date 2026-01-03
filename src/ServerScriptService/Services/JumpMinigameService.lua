@@ -8,8 +8,8 @@ local SoundUtil = require(RS.Modules.SoundUtil)
 
 local Remotes = RS.Remotes
 local StartMinigameTimer = Remotes:WaitForChild("StartMinigameTimer")
-
 local CompleteMinigameTimer = Remotes:WaitForChild("CompleteMinigameTimer")
+local TriggerHitObjectVFX = Remotes:WaitForChild("TriggerHitObjectVFX")
 
  local JumpMinigameService = {}
 JumpMinigameService.ActivePlayers = {} -- [player] = {startTime = os.clock()}
@@ -92,6 +92,13 @@ function JumpMinigameService:Init()
 				warn("No character to JUMP in JUMP MINIGAME")
 				return
 			end
+			
+			local player = Players:GetPlayerFromCharacter(character)
+			if not player then
+				warn("No player to JUMP in JUMP MINIGAME")
+				return
+			end
+			
 			local humanoid = character:FindFirstChild("Humanoid")
 			if not humanoid then
 				warn("No humanoid to JUMP in JUMP MINIGAME")
@@ -100,8 +107,9 @@ function JumpMinigameService:Init()
 			local hrp = character:FindFirstChild("HumanoidRootPart")
 			if not hrp then return end
 			
-			-- Play touched sound
+			-- Play touched sound and VFX
 			SoundUtil.playSound(hitObjectSound, hrp)
+			TriggerHitObjectVFX:FireClient(player)
 			
 			-- Apply upward velocity to character
 			-- Find HumanoidRootPart and set its AssemblyLinearVelocity
