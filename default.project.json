@@ -17,10 +17,6 @@
       }
     },
 
-    "ServerStorage": {
-      "$path": "src/ServerStorage"
-    },
-
     "Workspace": {
       "$properties": {
         "FilteringEnabled": true,
