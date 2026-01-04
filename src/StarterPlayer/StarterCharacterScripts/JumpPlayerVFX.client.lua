@@ -23,11 +23,8 @@ local function setupJumpVFX(character)
 	yellowParticle.Color = ColorSequence.new(Color3.fromRGB(255, 255, 0))
 	yellowParticle.Size = NumberSequence.new(1)
 	yellowParticle.LightEmission = 1
-	-- squash of 3 values keys that have time, value and envelope
 	yellowParticle.Squash = NumberSequence.new(0)
 	yellowParticle.Texture = "rbxassetid://111125230747373"
-	--rbxassetid://100264719749986
-	--rbxasset://textures/particles/smoke_main.dds
 	yellowParticle.Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0),
 		NumberSequenceKeypoint.new(0.351, 0.306),
@@ -50,8 +47,6 @@ local function setupJumpVFX(character)
 		NumberSequenceKeypoint.new(1, 5)
 	})
 	smoke.Texture = "rbxassetid://126204840295633"
-	--rbxassetid://121221329129233
-	--rbxasset://textures/particles/sparkles_main.dds
 	smoke.LightEmission = 0.55
 	smoke.Squash = NumberSequence.new(0)
 	smoke.Transparency = NumberSequence.new({
@@ -92,8 +87,7 @@ local function setupJumpVFX(character)
 		end
 
 		-- 3. If speed is >= 100, enable yellowParticle
-		if speed >= 10 then
-			--particle.Enabled = true
+		if speed >= 100 then
 			print("ENABLING PARTICLES")
 			yellowParticle.Enabled = true
 			smoke.Enabled = true

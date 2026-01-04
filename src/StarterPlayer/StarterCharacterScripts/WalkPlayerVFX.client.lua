@@ -3,6 +3,9 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
+-- Take player's state if running fast (above 100 speed) or not
+local isRunningFast = false
+
 -- Dirt particle
 -- helper function to create dirt particles
 local function createDirtParticle(parent)
@@ -156,10 +159,9 @@ local function setupSpeedVFX(character)
 			dirtRight.Enabled = false
 			return
 		end
-		
+
 		-- 3. If speed is >= 100, enable trail
-		if speed >= 10 then
-			--particle.Enabled = true
+		if speed >= 100 then
 			print("ENABLING PARTICLES")
 			trail.Enabled = true
 			electricity.Enabled = true

@@ -167,6 +167,12 @@ function BullyService:StartFight(player, bully)
 
 	if not playerData then return end
 	
+	-- Check if player already in an active fight
+	if self.ActiveFights[player] then
+		print(player.Name, "is already in a fight")
+		return
+	end
+	
 	-- If player is dead, no fight
 	local character = player.Character
 	local humanoid = character and character:FindFirstChild("Humanoid")
@@ -324,10 +330,6 @@ function BullyService:EndFight(player, result)
 	stopAllAnimations(player.Character)
 	stopAllAnimations(fight.bully)
 
-	-- Clean up
-	self.ActiveFights[player] = nil
-	StateService:SetState(player, "Idle")
-
 	if result == "Victory" then
 		-- Play victory animation
 		local track = playAnimation(player.Character, Constants.Animations.Player.Victory)
@@ -400,6 +402,10 @@ function BullyService:EndFight(player, result)
 		FightEndDefeat:FireClient(player, "Defeat")
 		print(player.Name, "DEFEAT!")
 	end
+	
+	-- Clean up
+	self.ActiveFights[player] = nil
+	StateService:SetState(player, "Idle")
 end
 
 -- Connect remote for player attacks

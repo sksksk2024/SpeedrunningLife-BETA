@@ -3,6 +3,12 @@ local RS = game:GetService("ReplicatedStorage")
 local ts = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
 local UIS = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Remotes
+local Remotes = RS.Remotes
+local TriggerTeleportVFX = Remotes:WaitForChild("TriggerTeleportVFX")
 
 -- 🔧 PART 1: Impact Shockwave
 local function createShockwave(position)
@@ -234,19 +240,26 @@ local function playGroundSlamEffect(position)
 end
 
 -- TEST
-local testPart = workspace:FindFirstChild("Main")
-	or Instance.new("Part", workspace)
-testPart.Name = "Main"
-testPart.Size = Vector3.new(4, 1, 4)
-testPart.Position = Vector3.new(0, 10, 0)
-testPart.Anchored = true
+--local testPart = workspace:FindFirstChild("Main")
+--	or Instance.new("Part", workspace)
+--testPart.Name = "Main"
+--testPart.Size = Vector3.new(4, 1, 4)
+--testPart.Position = Vector3.new(0, 10, 0)
+--testPart.Anchored = true
 
-UIS.InputBegan:Connect(function(input, processed)
-	if processed then return end
+--UIS.InputBegan:Connect(function(input, processed)
+--	if processed then return end
 
-	if input.KeyCode == Enum.KeyCode.Q then
-		playGroundSlamEffect(testPart.Position)
-	end
+--	if input.KeyCode == Enum.KeyCode.Q then
+--		playGroundSlamEffect(testPart.Position)
+--	end
+--end)
+
+-- Listen to remote events
+TriggerTeleportVFX.OnClientEvent:Connect(function()
+	-- Take the player's hrp position
+	local character = player and player.Character
+	local hrp = character and character:WaitForChild("HumanoidRootPart")
+	
+	playGroundSlamEffect(hrp.Position - Vector3.new(0, 5, 0))
 end)
-
-print("Press Q to test Ground Slam Effect")

@@ -7,6 +7,10 @@ local StateService = require(Services.StateService)
 local Constants = require(RS.Modules.Constants)
 local SoundUtil = require(RS.Modules.SoundUtil)
 
+-- Remotes
+local Remotes = RS.Remotes
+local TriggerStatResultScreenFlash = Remotes:WaitForChild("TriggerStatResultScreenFlash")
+
 -- Sound
 local leveledUpSound = Constants.Sounds.leveledUpSound
 local energySound = Constants.Sounds.energySound
@@ -90,6 +94,8 @@ function ResourceService:UseStation(player, stationType, tier)
 	
 	PlayerDataService:UpdateStat(player, statName, newValue)
 	
+	-- Fire client for screen flash
+	TriggerStatResultScreenFlash:FireClient(player, statName)
 	
 	return true
 end
