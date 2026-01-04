@@ -7,6 +7,10 @@ local doorOpeningSound = Constants.Sounds.doorOpening
 local doorClosingSound = Constants.Sounds.doorClosing
 local teleportSound = Constants.Sounds.teleportSound
 
+-- Remotes
+local Remotes = RS.Remotes
+local TriggerTeleportVFX = Remotes:WaitForChild("TriggerTeleportVFX")
+
 local DoorService = {}
 
 function DoorService:Init()
@@ -135,6 +139,8 @@ function DoorService:TeleportPlayer(door, player)
 	
 	-- Play teleport sound
 	SoundUtil.playSound(teleportSound, hrp)
+	
+	TriggerTeleportVFX:FireClient(player)
 	
 	print("Teleported", player.Name, "to", destinationName)
 end

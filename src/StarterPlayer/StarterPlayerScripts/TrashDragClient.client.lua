@@ -1,3 +1,4 @@
+local ts = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -7,6 +8,7 @@ local SoundUtil = require(RS.Modules.SoundUtil)
 
 local Remotes = RS.Remotes
 local claimTrashEvent = Remotes:FindFirstChild("ClaimTrashEvent")
+local TriggerTrashStatResultScreenFlash = Remotes:WaitForChild("TriggerTrashStatResultScreenFlash")
 
 local player = Players.LocalPlayer
 local mouse = player:GetMouse()
@@ -16,6 +18,10 @@ local TrashDragClient = {}
 TrashDragClient.DraggingTrash = nil -- Currently dragged trash
 TrashDragClient.DragConnection = nil -- RenderStepped connection
 TrashDragClient.OriginalCFrame = nil -- Starting position
+
+-- Take UI elements
+local gui = player:WaitForChild("PlayerGui"):WaitForChild("TrashResultUI")
+local trashResultFrame = gui:WaitForChild("TrashResultFrame")
 
 local DRAG_DISTANCE = Constants.TrashDragDistance
 local MAX_PICKUP_DISTANCE = Constants.TrashPickupDistance
@@ -156,5 +162,35 @@ function TrashDragClient:GetTrashPosition(trash)
 	end
 	return nil
 end
+
+TriggerTrashStatResultScreenFlash.OnClientEvent:Connect(function()
+	local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+	local properties1 = {
+		BackgroundTransparency = 0,
+	}
+	local properties2 = {
+		BackgroundTransparency = 1,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	}
+	
+	trashResultFrame.Visible = true
+	local thirstTween = ts:Create(
+		trashResultFrame,
+		tweenInfo,
+		properties1
+	)
+	thirstTween:Play()
+	thirstTween.Completed:Connect(function()
+		local thirstTweenOut = ts:Create(
+			trashResultFrame,
+			tweenInfo,
+			properties2
+		)
+		thirstTweenOut:Play()
+		thirstTweenOut.Completed:Connect(function()
+			trashResultFrame.Visible = false
+		end)
+	end)
+end)
 
 return TrashDragClient

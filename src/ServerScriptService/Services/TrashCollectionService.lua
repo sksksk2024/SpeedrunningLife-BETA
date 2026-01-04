@@ -22,6 +22,7 @@ local XP_PER_TRASH = Constants.XPPerTrash
 -- Create RemoteEvent for client communication
 local Remotes = RS.Remotes
 local claimTrashEvent = Remotes:FindFirstChild("ClaimTrashEvent")
+local TriggerTrashStatResultScreenFlash = Remotes:WaitForChild("TriggerTrashStatResultScreenFlash")
 
 -- Create collision groups
 local function setupCollisionGroups()
@@ -209,6 +210,11 @@ function TrashCollectionService:CollectTrash(trash, collector)
 	if owner then
 		-- Award XP to the player
 		PlayerDataService:AddXP(owner, XP_PER_TRASH)
+		
+		-- Trigger Result UI Event
+		local player = Players:GetPlayerFromCharacter(ownerCharacter)
+		
+		TriggerTrashStatResultScreenFlash:FireClient(player)
 		
 		-- Play collection sound
 		SoundUtil.playSound(trashConvertedSound, hrp)

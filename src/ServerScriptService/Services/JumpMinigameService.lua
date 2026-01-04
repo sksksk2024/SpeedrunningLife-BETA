@@ -10,6 +10,7 @@ local Remotes = RS.Remotes
 local StartMinigameTimer = Remotes:WaitForChild("StartMinigameTimer")
 local CompleteMinigameTimer = Remotes:WaitForChild("CompleteMinigameTimer")
 local TriggerHitObjectVFX = Remotes:WaitForChild("TriggerHitObjectVFX")
+local TriggerTeleportVFX = Remotes:WaitForChild("TriggerTeleportVFX")
 
  local JumpMinigameService = {}
 JumpMinigameService.ActivePlayers = {} -- [player] = {startTime = os.clock()}
@@ -388,6 +389,9 @@ function JumpMinigameService:CompleteMinigame(player)
 	
 	-- Play win sound
 	SoundUtil.playSound(winJumpSound, hrp)
+	
+	-- Teleport player gfx
+	TriggerTeleportVFX:FireClient(player)
 	
 	-- reset player physics
 	humanoid.JumpPower = Constants.JumpPowerDefault

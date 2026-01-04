@@ -97,35 +97,36 @@ function PlayerDataService:AddXP(player, amount)
 	data.XP += amount
 
 	-- Check for level up
-	local xpNeeded = Constants.XPToLevelUp[data.Level]
-	if xpNeeded and data.XP >= xpNeeded then
+	while true do
+		local xpNeeded = Constants.XPToLevelUp[data.Level]
+		if not xpNeeded or data.XP < xpNeeded then
+			break
+		end
+		
+		-- Level up
 		data.XP -= xpNeeded
 		data.Level += 1
 		
-		-- Get hrp
-		local character = player.Character
-		local hrp = character and character:WaitForChild("HumanoidRootPart") or nil
-		if not hrp then return end
-		
-		-- Play leveled up sound
-		SoundUtil.playSound(leveledUpSound, hrp)
-
 		-- Increase max health
 		data.MaxHealth = Constants.BaseHealth + (data.Level - 1) * Constants.HealthPerLevel
 		data.Health = data.MaxHealth
 		data.Damage = Constants.PlayerBaseDamage + (data.Level - 1) * Constants.DamagePerLevel
-
-		-- Update both stats
-		self:UpdateStat(player, "MaxHealth", data.MaxHealth)
-		self:UpdateStat(player, "Health", data.Health)
-		self:UpdateStat(player, "Damage", data.Damage)
+		
+		-- Get hrp
+		local character = player.Character
+		local hrp = character and character:WaitForChild("HumanoidRootPart") or nil
+		if hrp then 
+			-- Play leveled up sound
+			SoundUtil.playSound(leveledUpSound, hrp)
+		end
 
 		-- Notify client with celebration
+		print("🔔 Firing LevelUp remote to", player.Name, "- Level:", data.Level)
 		Remotes.LevelUp:FireClient(player, data.Level)
 	end
 
-	self:UpdateStat(player, "XP", data.XP)
-	self:UpdateStat(player, "Level", data.Level)
+	-- Send ALL stats at once using UpdateAllStats instead of individual updates
+	Remotes.UpdateAllStats:FireClient(player, data)
 end
 
 function PlayerDataService:DefeatBully(player, bullyLevel)
@@ -146,16 +147,13 @@ end
 
 -- Initialize
 Players.PlayerAdded:Connect(function(player)
-	PlayerDataService:Load(player)
-	
 	-- Get hrp
-	local character = player.Character
+	local character = player.Character or player.CharacterAdded:Wait()
 	local hrp = character and character:WaitForChild("HumanoidRootPart") or nil
 	if not hrp then return end
 	
-	-- Play revive sound
-	print("PLAY REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEVIVE SSSSSSSSSSSOOOOOOOOOUUUUUUUUUNNNNNNNNNNNNNNDDDDDDDDD")
-	SoundUtil.playSound(reviveSound, hrp)
+	PlayerDataService:Load(player)
+	
 	
 	-- Re-send stats when character respawns
 	player.CharacterAdded:Connect(function(character)
