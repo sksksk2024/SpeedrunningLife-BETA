@@ -3,13 +3,15 @@ local DEFAULT_DATA = {
 	Energy = 100,
 	Level = 1,
 	XP = 0,
-	Health = 100,
+	Health = 100, 
 	Damage = 10,
 	MaxHealth = 100,
 	CompletedLevels = {},
 	DefeatedBullies = {},
 	HasSeenIntroCutscene = false,
 	HasSeenTutorial = false,
+	CompleteCityTimer = 0.000,
+	StartedCityTimer = 0.000,
 }
 
 local DataStoreService = game:GetService("DataStoreService")
