@@ -8,19 +8,23 @@ local ShowLoadingScreen = Remotes:WaitForChild("ShowLoadingScreen")
 local PlayCutscene = Remotes:WaitForChild("PlayCutscene")
 local EndCutscene = Remotes:WaitForChild("EndCutscene")
 
+local TeleportPlayer = workspace.TeleportPlayer
+
+local Areas = workspace.Areas
+
 local CutsceneService = {}
 
  --Anchor player immediately when they spawn (before cutscene logic runs)
---Players.PlayerAdded:Connect(function(player)
---	player.CharacterAdded:Connect(function(character)
---		local hrp = character:WaitForChild("HumanoidRootPart", 10)
---		if hrp then
---			-- Anchor immediately to prevent movement before cutscene
---			hrp.Anchored = true
---			print("Player anchored on spawn:", player.Name)
---		end
---	end)
---end)
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function(character)
+		local hrp = character:WaitForChild("HumanoidRootPart", 10)
+		if hrp then
+			-- Anchor immediately to prevent movement before cutscene
+			hrp.Anchored = true
+			print("Player anchored on spawn:", player.Name)
+		end
+	end)
+end)
 
 function CutsceneService:PlayIntroCutscene(player)
 	local data = PlayerDataService:GetData(player)
@@ -113,7 +117,7 @@ function CutsceneService:PlayIntroCutscene(player)
 	print("Positioned clone at:", cutsceneSpawnPoint:GetPivot())
 	
 	-- Hide real player
-	hrp.CFrame = CFrame.new(0, -1000, 0)
+	hrp.CFrame = TeleportPlayer.CFrame + Vector3.new(0, 5, 0)
 	hrp.Anchored = true	
 
 	-- Lock player movement
@@ -139,6 +143,20 @@ function CutsceneService:PlayGuideCutscene(player)
 		hrp.Anchored = true
 	end
 	
+	-- Activate the area sound
+	local Guide1Area = Instance.new("Part")
+	Guide1Area.Name = "Guide1Area"
+	Guide1Area.Anchored = true
+	Guide1Area.CanCollide = false
+	Guide1Area.Position = Vector3.new(35.5, 38.834, -73.1)
+	Guide1Area.Size = Vector3.new(187.6, 147.3, 212.6 )
+	Guide1Area.Transparency = 1
+	Guide1Area.Parent = Areas
+	
+	local Sound = Instance.new("Sound")
+	Sound.SoundId = "rbxassetid://75963850963192"
+	Sound.Parent = Guide1Area
+	
 	-- No clone
 	PlayCutscene:FireClient(player, "Guide")
 end
@@ -146,6 +164,14 @@ end
 -- Handle when client finishes cutscene
 EndCutscene.OnServerEvent:Connect(function(player, cutsceneName)
 	StateService:SetState(player, "Idle")
+	
+	-- If guide cutscene, destroy the Guide1Area part
+	if cutsceneName == "Guide" then
+		local Guide1Area = workspace.GYMCutscene:FindFirstChild("Guide1Area")
+		if Guide1Area then
+			Guide1Area:Destroy()
+		end	
+	end
 	
 	-- Clean up the clone
 	-- HINT: you might need to store clones in a table
