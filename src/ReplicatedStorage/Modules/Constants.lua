@@ -9,6 +9,9 @@ Constants.DefaultStats = {
 	DefeatedBullies = {},
 }
 
+-- VAULT ANIMATIONS
+
+
 -- JUMP MINIGAME
 Constants.XPPerJumpWin = 10000
 Constants.DistanceLeaveGame = 1100
@@ -99,6 +102,26 @@ Constants.XPToLevelUp = {
 	[13] = 10000,
 }
 
+Constants.Badges = {
+	Visited = 3602368334706924,
+	CityComplete = 1518773638548990,
+}
+
+Constants.Passes = {
+	DoubleSpeed = 1729936942,
+	Teleportation = 1728534055,
+}
+
+Constants.DevProducts = {
+	RechargeResources = 3546245020,
+	LevelUp = 3546245246,
+	RechargeMap = 3546244773,
+	BadDeath = 3546245992,
+}
+
+--FullHP = 3546245992, -- DevProduct
+
+
 Constants.LevelRewards = {
 	--City = {Money = 50, Energy = -20},
 	City = {Energy = 20}
@@ -127,6 +150,14 @@ Constants.Lighting = {
 
 Constants.Sounds = {
 	-- SFX
+	outsideAmbient = {
+		id = 73599153219420,
+		volume = 0.05,
+	},
+	insideAmbient = {
+		id = 9043883407,
+		volume = 0.05,
+	},
 	vfxTutorialAudio = {
 		id = 128690660595672,
 		volume = 0.5,
@@ -146,14 +177,6 @@ Constants.Sounds = {
 	bullyPunchSound = {
 		id = 9117969687,
 		volume = 0.5,
-	},
-	outsideAmbient = {
-		id = 73599153219420,
-		volume = 0.05,
-	},
-	insideAmbient = {
-		id = 9043883407,
-		volume = 0.05,
 	},
 	trashDropSound = {
 		id = 9118731216,

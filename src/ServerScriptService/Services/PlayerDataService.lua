@@ -17,6 +17,7 @@ local DEFAULT_DATA = {
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
+local BadgeService = game:GetService("BadgeService")
 
 local Constants = require(RS.Modules.Constants)
 local Remotes = RS.Remotes
@@ -47,8 +48,8 @@ end
 function PlayerDataService:Load(player)
 	local data
 	local success, err = pcall(function()
-		--data = store:GetAsync(player.UserId)
-		print("Doesn't load")
+		data = store:GetAsync(player.UserId)
+		--print("Doesn't load")
 	end)
 
 	if not success or not data then
@@ -68,12 +69,27 @@ function PlayerDataService:Load(player)
 
 	-- Fire to client so UI can update
 	Remotes.UpdateAllStats:FireClient(player, data)
+	
+	self:CheckWallRemoval(player, data.Level)
 
 	return data
 end
 
 function PlayerDataService:GetData(player)
 	return self.Data[player.UserId]
+end
+
+function PlayerDataService:CheckWallRemoval(player, newLevel)
+	local wallsFolder = workspace:FindFirstChild("Walls")
+	if not wallsFolder then return end
+
+	for _, wall in pairs(wallsFolder:GetChildren()) do
+		local requiredLevel = wall:GetAttribute("Level")
+		if requiredLevel and newLevel >= requiredLevel then
+			-- Trimitem către client să distrugă peretele DOAR pentru el
+			Remotes.RemoveWall:FireClient(player, wall.Name) -- Trimitem numele sau obiectul
+		end
+	end
 end
 
 function PlayerDataService:UpdateStat(player, statName, value)
@@ -88,6 +104,14 @@ function PlayerDataService:UpdateStat(player, statName, value)
 		data[statName] = math.clamp(value, 0, 100)
 	end
 
+	if statName == "Health" and value <= 0 then
+		local character = player.Character
+		local humanoid = character and character:FindFirstChild("Humanoid")
+		if humanoid and humanoid.Health > 0 then
+			humanoid.Health = 0
+		end
+	end
+	
 	-- Notify client
 	Remotes.UpdateStat:FireClient(player, statName, data[statName])
 end
@@ -108,6 +132,8 @@ function PlayerDataService:AddXP(player, amount)
 		-- Level up
 		data.XP -= xpNeeded
 		data.Level += 1
+		
+		self:CheckWallRemoval(player, data.Level)
 		
 		-- Increase max health
 		data.MaxHealth = Constants.BaseHealth + (data.Level - 1) * Constants.HealthPerLevel
@@ -143,6 +169,25 @@ function PlayerDataService:DefeatBully(player, bullyLevel)
 	table.insert(data.DefeatedBullies, bullyLevel)
 end
 
+function PlayerDataService:AwardBadge(player, badgeId)
+	if not player or not badgeId then return end
+	
+	task.spawn(function()
+		local success, hasBadge = pcall(function()
+			return BadgeService:UserHasBadgeAsync(player.UserId, badgeId)
+		end)
+		
+		if success and not hasBadge then
+			local awardSuccess, err = pcall(function()
+				BadgeService:AwardBadgeAsync(player.UserId, badgeId)
+			end)
+			if not awardSuccess then
+				warn("Error when awarding the badge", err)
+			end
+		end
+	end)
+end
+
 --function PlayerDataService:CompleteQuest(player, questName)
 
 --end
@@ -175,8 +220,8 @@ Players.PlayerRemoving:Connect(function(player)
 
 	-- Save data here
 	local success, err = pcall(function()
-		--store:SetAsync(player.UserId, data)
-		print("Doesn't saves")
+		store:SetAsync(player.UserId, data)
+		--print("Doesn't saves")
 	end)
 
 	if not success then

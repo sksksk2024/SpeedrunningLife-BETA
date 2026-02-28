@@ -5,6 +5,7 @@ local RS = game:GetService("ReplicatedStorage")
 local Services = RS.Modules
 local Constants = require(Services.Constants)
 local SoundUtil = require(Services.SoundUtil)
+local PassService = require(script.Parent.PassService)
 
 -- Sounds
 local speedBoost = Constants.Sounds.speedBoost
@@ -21,13 +22,16 @@ local function onSpeedPlatformTouched(hit)
 	local hrp = character:WaitForChild("HumanoidRootPart")
 	if not hrp then return end
 	
-	if humanoid and humanoid.WalkSpeed ~= Constants.WalkSpeedPad then
-		humanoid.WalkSpeed = Constants.WalkSpeedPad
-		
+	local player = Players:GetPlayerFromCharacter(character)
+	if not player or not humanoid then return end
+	
+	local multiplier = PassService.HasSpeedPass[player.UserId] and 2 or 1
+	local targetSpeed = Constants.WalkSpeedPad * multiplier
+	
+	if humanoid and humanoid.WalkSpeed ~= targetSpeed then
+		humanoid.WalkSpeed = targetSpeed
 		-- Play Speed Boost Sound
 		SoundUtil.playSound(speedBoost, hrp)
-		
-		print(character.Name, "got speed boost!")
 	end
 end
 
@@ -36,15 +40,14 @@ local function onSlowPlatformTouched(hit)
 	local humanoid = character:WaitForChild("Humanoid")
 	local hrp = character:WaitForChild("HumanoidRootPart")
 	if not hrp then return end
+	local player = Players:GetPlayerFromCharacter(character)
+	if not player or not humanoid then return end
 	
-	if humanoid and humanoid.WalkSpeed == Constants.WalkSpeedPad then
-		humanoid.WalkSpeed = Constants.WalkSpeedDefault
-		
-		-- Play Slow Boost Sound
-		SoundUtil.playSound(slowBoost, hrp)
-		
-		print(character.Name, "got normal speed")
-	end
+	-- Reset to 16 or 32
+	local multiplier = PassService.HasSpeedPass[player.UserId] and 2 or 1
+	humanoid.WalkSpeed = Constants.WalkSpeedDefault * multiplier
+	-- Play Slow Boost Sound
+	SoundUtil.playSound(slowBoost, hrp)
 end
 
 function WorldService:Init()

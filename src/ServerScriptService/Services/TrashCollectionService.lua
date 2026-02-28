@@ -4,6 +4,9 @@ local RS = game:GetService("ReplicatedStorage")
 local ServerScriptStorage = game:GetService("ServerScriptService")
 local Services = ServerScriptStorage.Services
 
+local ServerStorage = game:GetService("ServerStorage")
+local MapResetEvent = ServerStorage.Bindables:WaitForChild("MapResetEvent")
+
 local PlayerDataService = require(Services.PlayerDataService)
 local Constants = require(RS.Modules.Constants)
 local SoundUtil = require(RS.Modules.SoundUtil)
@@ -41,7 +44,7 @@ local function setupCollisionGroups()
 		-- Make trash NOT collide with players
 		PhysicsService:CollisionGroupSetCollidable("Trash", "Players", false)
 
-		print("Collision groups created: Trash won't collide with players!")
+		--print("Collision groups created: Trash won't collide with players!")
 	end
 end
 
@@ -53,14 +56,28 @@ function TrashCollectionService:Init()
 		warn("Trash folder not found!")
 		return
 	end
-	print("=== TRASH SETUP ===")
+	
 	-- Setup all trash items
 	for _, category in trashFolder:GetChildren() do
 		for _, trash in category:GetChildren() do
 			self:SetupTrashItem(trash) -- setup each trash item
 		end
 	end
-	print("=== SETUP COMPLETE ===")
+	
+	MapResetEvent.Event:Connect(function()
+		print("Reset detected")
+
+		self.ActiveTrash = {}
+		self.TrashOwners = {}
+
+		local trashFolder = workspace.LakeMinigame:WaitForChild("Trash")
+
+		for _, category in trashFolder:GetChildren() do
+			for _, trash in category:GetChildren() do
+				self:SetupTrashItem(trash)
+			end
+		end
+	end)
 
 	-- Find all collectors
 	local collectorsFolder = lakeMinigameFolder:WaitForChild("TrashCollectors")
@@ -91,13 +108,11 @@ function TrashCollectionService:Init()
 			end
 		end)
 	end)
-
-	print("TrashCollectionService initialized")
 end
 
 function TrashCollectionService:SetupTrashItem(trash)
 	-- Check if trash is a BasePart (single part)
-	print("Setting up trash:", trash.Name, trash.ClassName)
+	--print("Setting up trash:", trash.Name, trash.ClassName)
 
 	if trash:IsA("BasePart") then
 		self.ActiveTrash[trash] = true
@@ -114,12 +129,12 @@ function TrashCollectionService:SetupTrashItem(trash)
 				local player = Players:GetPlayerFromCharacter(hit.Parent)
 				if player then
 					self.TrashOwners[trash] = player
-					print(player.Name, "is now owner of", trash.Name)
+					--print(player.Name, "is now owner of", trash.Name)
 				end
 			end
 		end)
 		
-		print("✓ Trash configured:", trash.Name)
+		--print("✓ Trash configured:", trash.Name)
 	elseif trash:IsA("Model") then
 		local primaryPart = trash.PrimaryPart or trash:FindFirstChildWhichIsA("BasePart")
 		if primaryPart then
@@ -153,7 +168,7 @@ function TrashCollectionService:SetupTrashItem(trash)
 end
 
 function TrashCollectionService:StartCollectionLoop(collectorsFolder)
-	print("=== COLLECTORS ===")
+	--print("=== COLLECTORS ===")
 	-- Use task.spawn to run code in parallel
 	task.spawn(function()
 		while true do
@@ -219,7 +234,7 @@ function TrashCollectionService:CollectTrash(trash, collector)
 		-- Play collection sound
 		SoundUtil.playSound(trashConvertedSound, hrp)
 		
-		print(owner.Name, "collected", trash.Name, "and gained", XP_PER_TRASH, "XP!")
+		--print(owner.Name, "collected", trash.Name, "and gained", XP_PER_TRASH, "XP!")
 	else
 		print("Trash collected but no player nearby!")
 	end

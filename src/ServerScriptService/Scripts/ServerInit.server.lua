@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local BadgeService = game:GetService("BadgeService")
 local Services = ServerScriptService.Services
 
 local PlayerDataService = require(Services.PlayerDataService)
@@ -16,6 +17,8 @@ local ResourceService = require(Services.ResourceService)
 local TrashCollectionService = require(Services.TrashCollectionService)
 local JumpMinigameService = require(Services.JumpMinigameService)
 local FinalWallService = require(Services.FinalWallsService)
+local PassService = require(Services.PassService)
+local ProductService = require(Services.ProductService)
 
 local Constants = require(RS.Modules.Constants)
 local SoundUtil = require(RS.Modules.SoundUtil)
@@ -35,10 +38,12 @@ PlayerSetupService:Init()
 BullyService:Init()
 JumpMinigameService:Init()
 FinalWallService:Init()
+PassService:Init()
+ProductService:Init()
 
 -- Guide cutscene proximity detection
 local GUIDE_TRIGGER_DISTANCE = Constants.TriggerDistance
-local guideTriggerModel = workspace.alexs:WaitForChild("GUIDE")
+local guideTriggerModel = workspace.alexs:WaitForChild("Characters"):WaitForChild("GUIDE")
 
 local playersWhoSawGuide = {}
 
@@ -62,7 +67,21 @@ Players.PlayerAdded:Connect(function(player)
 		PlayerDataService:UpdateStat(player, "StartedCityTimer", os.clock())
 
 		-- Play intro cutscene on first join
-		--CutsceneService:PlayIntroCutscene(player)
+		-- set data service here for not to play twice
+		if data.HasSeenIntroCutscene == false then
+			CutsceneService:PlayIntroCutscene(player)
+			PlayerDataService:UpdateStat(player, "HasSeenIntroCutscene", true)
+		else
+			local character = player.Character
+			if character and character:FindFirstChild("HumanoidRootPart") then
+				character.HumanoidRootPart.Anchored = false
+			end
+			print(player.Name, "Has seen intro cutscene")
+		end
+		
+		
+		-- Get Badge
+		PlayerDataService:AwardBadge(player, Constants.Badges.Visited)
 	end)
 end)
 
@@ -120,7 +139,7 @@ task.spawn(function()
 			if distance <= GUIDE_TRIGGER_DISTANCE then
 				print(player.Name, "triggered GUIDE curscene")
 				playersWhoSawGuide[player] = true
-				--CutsceneService:PlayGuideCutscene(player)
+				CutsceneService:PlayGuideCutscene(player)
 			end
 		end
 	end

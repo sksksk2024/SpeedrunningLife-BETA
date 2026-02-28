@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local PassService = require(ServerScriptService.Services.PassService)
 
 local Constants = require(RS.Modules.Constants)
 local Remotes = RS.Remotes
@@ -166,13 +167,13 @@ function BullyService:StartFight(player, bully)
 	local playerData = PlayerDataService:GetData(player)
 
 	if not playerData then return end
-	
+
 	-- Check if player already in an active fight
 	if self.ActiveFights[player] then
 		print(player.Name, "is already in a fight")
 		return
 	end
-	
+
 	-- If player is dead, no fight
 	local character = player.Character
 	local humanoid = character and character:FindFirstChild("Humanoid")
@@ -232,7 +233,7 @@ end
 
 function BullyService:PlayerAttack(player)
 	local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-	
+
 	local fight = self.ActiveFights[player]
 	if not fight then return end
 
@@ -298,7 +299,7 @@ function BullyService:BullyAttackLoop(player)
 
 		-- Play bully's punch sound
 		SoundUtil.playSound(punchBullySound, hrp)
-		
+
 		-- Trigger punch VFX on bully
 		TriggerPunchBullyVFX:FireClient(player, fight.bully)
 
@@ -322,7 +323,7 @@ end
 function BullyService:EndFight(player, result)
 	local hrp = player.Character:WaitForChild("HumanoidRootPart")
 	if not hrp then return end
-	
+
 	local fight = self.ActiveFights[player]
 	if not fight then return end
 
@@ -359,14 +360,14 @@ function BullyService:EndFight(player, result)
 		-- Get player's current stats
 		local data = PlayerDataService:GetData(player)
 		if not data then return end
-		
+
 		-- Drain both stats by 10
 		PlayerDataService:UpdateStat(player, "Thirst", data.Thirst - 10)
 		PlayerDataService:UpdateStat(player, "Energy", data.Energy - 10)
 
 		-- Fire victory celebration to client
 		FightEndWin:FireClient(player, "Victory", xpGain)
-		
+
 		-- Win Sound
 		--task.delay(3, function()
 		--	winSound:Play()
@@ -387,10 +388,10 @@ function BullyService:EndFight(player, result)
 		if prompt then
 			prompt.Enabled = true
 		end
-		
+
 		local data = PlayerDataService:GetData(player)
 		if not data then return end
-		
+
 		-- Drain both stats by 25 when defeated
 		PlayerDataService:UpdateStat(player, "Thirst", data.Thirst - 25)
 		PlayerDataService:UpdateStat(player, "Energy", data.Energy - 25)
@@ -403,6 +404,8 @@ function BullyService:EndFight(player, result)
 		print(player.Name, "DEFEAT!")
 	end
 	
+	PassService:ApplySpeed(player)
+
 	-- Clean up
 	self.ActiveFights[player] = nil
 	StateService:SetState(player, "Idle")
